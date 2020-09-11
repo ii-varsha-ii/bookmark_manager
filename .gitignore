@@ -53,7 +53,7 @@ Thumbs.db
 /node_modules
 /.pnp
 .pnp.js
-
+venv
 # testing
 /coverage
 
@@ -61,6 +61,7 @@ Thumbs.db
 /build
 
 # misc
+__pycache__
 .DS_Store
 .env.local
 .env.development.local
