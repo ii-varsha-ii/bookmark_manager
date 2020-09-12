@@ -1,3 +1,16 @@
+import * as ActionTypes from './ActionTypes';
+import { configUrl } from './config';
+
+export const setUser = (details) => ({
+    type: ActionTypes.SET_USER,
+    payload: details
+});
+
+export const logout = () => ({
+    type: ActionTypes.LOGOUT
+});
+
+
 export const registerUser = (firstname, lastname, email, password) => (dispatch) =>
 {
     const newUser = {
@@ -9,7 +22,7 @@ export const registerUser = (firstname, lastname, email, password) => (dispatch)
     newUser.date = new Date().toISOString();
 
     
-    return fetch('https://g1fw5h01n7.execute-api.us-east-1.amazonaws.com/dev/src/register', {
+    return fetch(configUrl + '/register', {
         method: 'POST',
         mode: "cors",
         cache: "no-cache",
@@ -51,7 +64,7 @@ export const loginUser = (email, password) => (dispatch) =>
         password: password
     }
     
-    return fetch('https://g1fw5h01n7.execute-api.us-east-1.amazonaws.com/dev/src/login', {
+    return fetch(configUrl + '/login', {
         method: 'POST',
         mode: "cors",
         cache: "no-cache",
@@ -78,14 +91,21 @@ export const loginUser = (email, password) => (dispatch) =>
      })
      .then(response => response.json())
      .then(response => {
+        
         console.log('Logged In: ', response);
-        localStorage.setItem("username", response.username);
-        localStorage.setItem("email", response.email);
-        localStorage.setItem("logged_in", "True");
-        alert(response);
+        if (response.status == "False")
+            alert(response.message)
+        else
+        {
+            dispatch(setUser(response));
+            alert("Hello , " + response.firstname + " " + response.lastname);
+        }
      })
      .catch(error => {
          console.log('Login failed: ', error.message);
          alert('Login failed: '+ error.message);
      })
+}
+export const logoutUser = () => (dispatch) => {
+    dispatch(logout());
 }

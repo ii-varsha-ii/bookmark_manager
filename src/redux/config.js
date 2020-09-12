@@ -1,0 +1,1 @@
+export const configUrl = 'https://g1fw5h01n7.execute-api.us-east-1.amazonaws.com/dev/src';

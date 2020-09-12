@@ -115,7 +115,7 @@ class Header extends Component {
     }
 
     handleLogout() {
-        localStorage.clear();
+        this.props.logoutUser();
     }
     render() {
       const errors = this.validate(this.state.firstname, this.state.lastname, this.state.email, this.state.password, this.state.confirmpassword);
@@ -141,7 +141,7 @@ class Header extends Component {
                                 <span className="fa fa-lg"></span>Register
                             </Button>
                         </NavItem>
-                        { (localStorage.getItem("logged_in") === "True") ? <NavItem>
+                        { (this.props.status === "True") ? <NavItem>
                             <NavLink className="nav-link" to="/organiser" onClick={this.handleLogout}>
                                 <span className="fa fa-home fa-lg"></span> Log Out
                             </NavLink> 

@@ -1,23 +1,14 @@
 import React, { Component } from 'react';
 import Header from './HeaderComponent';
 
-class Organiser extends Component {
+function Organiser(props) {
 
-    constructor(props)
-    {
-        super(props);
-        this.state = {
-            username: localStorage.username
-        }
-    }
-    render() {
-      
-      return (
-        <>
-         <h1>Hi {this.state.username}</h1>
-        </>
-      );
-    }
-  }
+    return (
+    <>
+        <h1>Hi {props.username}</h1>
+    </>
+    );
+}
+
   
   export default Organiser;
