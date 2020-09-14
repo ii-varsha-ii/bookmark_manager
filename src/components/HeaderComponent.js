@@ -22,7 +22,8 @@ class Header extends Component {
                 confirmpassword: false
             },
             isLoginModalOpen: false,
-            isRegisterModalOpen: false
+            isRegisterModalOpen: false,
+            isBookmarkModalOpen: false
         }
         this.handleInputChange = this.handleInputChange.bind(this);
         this.handleBlur = this.handleBlur.bind(this);
@@ -97,6 +98,12 @@ class Header extends Component {
         });
     }
 
+    toggleBookmarkModal = () => {
+        this.setState({
+            isBookmarkModalOpen: !this.state.isBookmarkModalOpen
+        });
+    }
+
     handleLogin(event) {
         this.toggleLoginModal();
         alert("Username: " + this.username.value + " Password: " + this.password.value + " Remember:" + this.remember.checked);
@@ -127,11 +134,6 @@ class Header extends Component {
                         <NavItem>
                             <NavLink className="nav-link" to="/organiser">
                                 <span className="fa fa-home fa-lg"></span> Organiser
-                            </NavLink>
-                        </NavItem>
-                        <NavItem>
-                            <NavLink className="nav-link" to="/manager">
-                                <span className="fa fa-home fa-lg"></span> Manager
                             </NavLink>
                         </NavItem>
                     </Nav>
