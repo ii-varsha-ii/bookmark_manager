@@ -1,20 +1,24 @@
 import React, { Component } from 'react';
 import Header from './HeaderComponent';
 import Organiser from './OrganiserComponent';
-import { registerUser, loginUser, logoutUser } from '../redux/ActionCreators';
-import {Switch, Route, Redirect, withRouter} from 'react-router-dom';
+import { registerUser, loginUser, logoutUser, postBookmark } from '../redux/ActionCreators';
+import { Switch, Route, Redirect, withRouter} from 'react-router-dom';
 import { connect } from 'react-redux';
+import Manager from './ManagerComponent';
+import { ThemeConsumer } from 'react-bootstrap/esm/ThemeProvider';
 
 
 const mapStateToProps = state => {
     return{
-       user: state.user
+      user: state.user,
+      bookmarks: state.bookmarks
     }
 }
 const mapDispatchToProps = (dispatch) => ({
     registerUser: (firstName, lastName, email, password) => dispatch(registerUser(firstName, lastName, email, password)),
     loginUser: (email, password) => dispatch(loginUser(email, password)),
-    logoutUser: () => {dispatch(logoutUser())}
+    logoutUser: () => {dispatch(logoutUser())},
+    postBookmark: (userId, parent, child, name, url) => dispatch(postBookmark(userId, parent, child, name, url))
 })
 
 class Main extends Component {
@@ -30,7 +34,9 @@ class Main extends Component {
         <>
             <Header registerUser={this.props.registerUser} loginUser={this.props.loginUser} logoutUser={this.props.logoutUser} status={this.props.user.status}/>
             <Switch>
-              <Route path="/" component={() => <Organiser username={this.props.user.name}/>} />
+              <Route path="/organiser" component={() => <Organiser username={this.props.user.name} bookmarks={this.props.bookmarks}/>} />
+              <Route path="/manager" component={() => <Manager createBookmark = {this.props.postBookmark} userId={this.props.user.id}/> } />
+              <Redirect to="/organiser" />
             </Switch>
         </>
       );

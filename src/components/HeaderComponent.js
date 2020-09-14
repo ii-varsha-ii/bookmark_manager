@@ -129,6 +129,11 @@ class Header extends Component {
                                 <span className="fa fa-home fa-lg"></span> Organiser
                             </NavLink>
                         </NavItem>
+                        <NavItem>
+                            <NavLink className="nav-link" to="/manager">
+                                <span className="fa fa-home fa-lg"></span> Manager
+                            </NavLink>
+                        </NavItem>
                     </Nav>
                     <Nav className="ml-auto" navbar>
                         <NavItem>
@@ -141,12 +146,14 @@ class Header extends Component {
                                 <span className="fa fa-lg"></span>Register
                             </Button>
                         </NavItem>
-                        { (this.props.status === "True") ? <NavItem>
-                            <NavLink className="nav-link" to="/organiser" onClick={this.handleLogout}>
-                                <span className="fa fa-home fa-lg"></span> Log Out
-                            </NavLink> 
-                        </NavItem>
-                        : null }
+                        { 
+                            (this.props.status === "True") ? 
+                            <NavItem>
+                                <NavLink className="nav-link" to="/organiser" onClick={this.handleLogout}>
+                                    <span className="fa fa-home fa-lg"></span> Log Out
+                                </NavLink> 
+                            </NavItem> : null 
+                        }
                     </Nav>
                 </div>
             </Navbar>
@@ -155,7 +162,6 @@ class Header extends Component {
                     <div className="row row-header">
                         <div className="col-12 col-sm-6">
                             <h1>Bookmark Manager</h1>
-                            <h2></h2>
                         </div>
                     </div>
                 </div>
