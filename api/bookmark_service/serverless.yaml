@@ -1,0 +1,61 @@
+service: bookmarks-table
+
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: python3.8
+  environment:
+    BOOKMARKS_TABLE: ${self:service}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.BOOKMARKS_TABLE}"
+
+functions:
+  fetch:
+    handler: fetch.fetch
+    events:
+      - http:
+          path: fetch/{userid}
+          method: get
+          cors: true
+  create:
+    handler: create.create
+    events:
+      - http:
+          path: create
+          method: post
+          cors: true
+  delete:
+    handler: delete.delete
+    events:
+      - http:
+          path: delete/{userid}/{nodeid}
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    BookmarksDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: userid
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: userid
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.BOOKMARKS_TABLE}
