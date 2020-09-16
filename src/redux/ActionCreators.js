@@ -1,5 +1,6 @@
 import * as ActionTypes from './ActionTypes';
-import { configUrl } from './config';
+import { usersUrl, bookmarkUrl } from './config';
+import { getToken } from '../Authorisation';
 
 export const setUser = (details) => ({
     type: ActionTypes.SET_USER,
@@ -10,7 +11,6 @@ export const logout = () => ({
     type: ActionTypes.LOGOUT
 });
 
-
 export const registerUser = (firstname, lastname, email, password) => (dispatch) =>
 {
     const newUser = {
@@ -20,9 +20,8 @@ export const registerUser = (firstname, lastname, email, password) => (dispatch)
         password : password
     }
     newUser.date = new Date().toISOString();
-
     
-    return fetch(configUrl + '/register', {
+    return fetch( usersUrl + '/register', {
         method: 'POST',
         mode: "cors",
         cache: "no-cache",
@@ -44,7 +43,6 @@ export const registerUser = (firstname, lastname, email, password) => (dispatch)
         }
     },
     error => {   
-        var errmess = new Error(error.message);
         throw error;
      })
      .then(response => response.json())
@@ -57,6 +55,7 @@ export const registerUser = (firstname, lastname, email, password) => (dispatch)
          alert('Registeration failed: '+ error.message);
      })
 }
+
 export const loginUser = (email, password) => (dispatch) =>
 {
     const user = {
@@ -64,7 +63,7 @@ export const loginUser = (email, password) => (dispatch) =>
         password: password
     }
     
-    return fetch(configUrl + '/login', {
+    return fetch(usersUrl + '/login', {
         method: 'POST',
         mode: "cors",
         cache: "no-cache",
@@ -85,27 +84,188 @@ export const loginUser = (email, password) => (dispatch) =>
             throw error;
         }
     },
-    error => {   
-        var errmess = new Error(error.message);
+    error => {
         throw error;
-     })
-     .then(response => response.json())
-     .then(response => {
-        
-        console.log('Logged In: ', response);
-        if (response.status == "False")
-            alert(response.message)
-        else
-        {
-            dispatch(setUser(response));
-            alert("Hello , " + response.firstname + " " + response.lastname);
-        }
-     })
-     .catch(error => {
-         console.log('Login failed: ', error.message);
-         alert('Login failed: '+ error.message);
-     })
+    })
+    .then(response => response.json())
+    .then(response => {
+    
+    console.log('Logged In: ', response);
+    if (response.status === "False")
+        alert(response.message)
+    else
+    {
+        localStorage.setItem('token', response.auth_token);
+        localStorage.setItem('name', response.firstname);
+        dispatch(setUser(response));
+        dispatch(fetchBookmarks());
+        alert("Hello , " + response.firstname + " " + response.lastname);
+    }
+    })
+    .catch(error => {
+        console.log('Login failed: ', error.message);
+        alert('Login failed: '+ error.message);
+    });
 }
+
 export const logoutUser = () => (dispatch) => {
+    localStorage.clear();
     dispatch(logout());
+}
+
+export const refreshBookmarks = (details) => ({
+    type: ActionTypes.MODIFY_BOOKMARK,
+    payload: details
+});
+
+export const createBookmarks = (parentId, childId, name, url) => (dispatch) => {
+    const newBookmark = {
+        parent: parentId,
+        child: childId,
+        name: name,
+        url: url
+    }
+    //newBookmark.date = new Date().toISOString();
+    console.log(newBookmark);
+    return fetch(bookmarkUrl + '/create', {
+        method: 'POST',
+        mode: "cors",
+        cache: "no-cache",
+        body : JSON.stringify(newBookmark),
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type' : 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if(response.ok)
+        {
+            return response;
+        }
+        else{
+            var error = new Error('Error' + response.status + ": "+ response.statusText);
+            error.response = response;
+            throw error;
+        }
+    },
+    error => {
+        throw error;
+    })
+    .then(response => response.json())
+    .then(response => {
+        dispatch(refreshBookmarks(response.bookmarks));
+        console.log(response.bookmarks);
+        alert("New entry created " + response);
+    })
+    .catch(error => console.log(error.message))
+}
+
+export const fetchBookmarks = () => (dispatch) => {
+
+    return fetch( bookmarkUrl+ '/fetch' , {
+        method: 'GET',
+        mode: "cors",
+        cache: "no-cache",
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type' : 'application/json'
+        },
+        credentials: 'same-origin'
+    }).then(response => {
+            if (response.ok)
+            {
+                return response;
+            }
+            else {
+                var error = new Error('Error' + response.status + ': ' + response.statusText);
+                error.response = response;
+                throw error;
+            }
+        },
+        error => {
+            var errmess = new Error(error.message);
+            throw error;
+        }
+        )
+        .then(response => response.json())
+        .then(response => {
+            dispatch(refreshBookmarks(response.bookmarks));
+        })
+        .catch(error => console.log(error.message));
+}
+
+
+export const editBookmarks = (nodeId, name, url) => (dispatch) => {
+    const newBookmark = {
+        nodeid: nodeId,
+        name: name,
+        url: url
+    }
+    console.log(newBookmark);
+    return fetch(bookmarkUrl + '/update', {
+        method: 'PUT',
+        mode: "cors",
+        cache: "no-cache",
+        body : JSON.stringify(newBookmark),
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type' : 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if(response.ok)
+        {
+            return response;
+        }
+        else{
+            var error = new Error('Error' + response.status + ": "+ response.statusText);
+            error.response = response;
+            throw error;
+        }
+    },
+    error => {
+        throw error;
+    })
+    .then(response => response.json())
+    .then(response => {
+        dispatch(refreshBookmarks(response.bookmarks));
+        console.log("Entry updated:  " + response);
+    })
+    .catch(error => console.log(error.message))
+}
+
+export const deleteBookmarks = (nodeId) => (dispatch) => {
+
+    return fetch( bookmarkUrl + '/delete/' + nodeId, {
+        method: 'DELETE',
+        mode: "cors",
+        cache: "no-cache",
+        headers: {
+            'Authorization': `Bearer ${getToken()}`,
+            'Content-Type' : 'application/json'
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if(response.ok)
+        {
+            return response;
+        }
+        else{
+            var error = new Error('Error' + response.status + ": "+ response.statusText);
+            error.response = response;
+            throw error;
+        }
+    },
+    error => {
+        throw error;
+    })
+    .then(response => response.json())
+    .then(response => {
+        dispatch(refreshBookmarks(response.bookmarks));
+        console.log("Entry deleted: " + response.bookmarks);
+    })
+    .catch(error => console.log(error.message))
 }

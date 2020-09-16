@@ -1,10 +1,10 @@
 import * as ActionTypes from './ActionTypes';
 
-export const LoadUserData = (state = {
+export const User = (state = {
     id: '',
     name: '',
     email: '',
-    status: 'False'
+    status: false
     }, action = {}) => {
     switch(action.type) {
         case ActionTypes.SET_USER:

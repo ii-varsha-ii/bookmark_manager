@@ -27,11 +27,8 @@ class Create extends Component {
     };
 
     handleSubmit(event) {
-        console.log("Name: " + this.name.value + " Url: " + this.url.value );
-        // if(this.state.addChildFolder.length !== 1)
-        //     this.newFolderName.value = null;
-        alert("Name: " + this.name.value + " Url: " + this.url.value );
-        this.props.createBookmarks(this.props.userId, this.foldername.value, this.newFolderName.value, this.name.value, this.url.value);
+        console.log("Creating bookmark : Name: " + this.name.value + " Url: " + this.url.value );
+        this.props.createBookmarks(this.props.node.id, (this.state.addChildFolder.length == 1) ? this.newFolderName.value : null, this.name.value, this.url.value);
         event.preventDefault();
     };
     render() {
@@ -56,15 +53,9 @@ class Create extends Component {
                             </Col>
                         </FormGroup>
                         <FormGroup row>
-                            <Label htmlFor="folderName" sm={3}> Available Folders :</Label>
+                            <Label htmlFor="folderName" sm={3}> Folder : </Label>
                             <Col sm={6}>
-                                <Input type="select" name="folderName" id="folderName" innerRef = {(input)=> this.foldername = input} >
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                    <option value="5">5</option>
-                                </Input>
+                                <Input type="text" name="folderName" defaultValue={this.props.node.name} id="folderName" readOnly></Input>
                             </Col>
                         </FormGroup>
                         {

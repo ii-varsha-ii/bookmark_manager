@@ -14,7 +14,7 @@ def register(event, context):
     
     timestamp = str(time.time())
 
-    table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
+    table = dynamodb.Table(os.environ['USER_TABLE'])
 
     item = {
         'id': str(uuid.uuid1()),

@@ -6,7 +6,7 @@ provider:
   name: aws
   runtime: python3.8
   environment:
-    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    USER_TABLE: ${self:service}-${opt:stage, self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -16,22 +16,22 @@ provider:
         - dynamodb:PutItem
         - dynamodb:UpdateItem
         - dynamodb:DeleteItem
-      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USER_TABLE}"
 
 functions:
   register:
-    handler: src/register.register
+    handler: register.register
     events:
       - http:
-          path: src/register
+          path: register
           method: post
           cors: true
 
   login:
-    handler: src/login.login
+    handler: login.login
     events:
       - http:
-          path: src/login
+          path: login
           method: post
           cors: true
 
@@ -43,13 +43,16 @@ resources:
       Properties:
         AttributeDefinitions:
           -
-            AttributeName: id
+            AttributeName: email
             AttributeType: S
         KeySchema:
           -
-            AttributeName: id
+            AttributeName: email
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        TableName: ${self:provider.environment.USER_TABLE}
+
+plugins:
+  - serverless-python-requirements

@@ -1,20 +1,21 @@
-import React from 'react';  
+import React, { Component } from 'react';  
 import TreeView from '@material-ui/lab/TreeView';  
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';  
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';  
 import TreeItem from '@material-ui/lab/TreeItem';  
-import { ListGroupItem, Row, Col } from 'reactstrap';
+import { Row, Col, ListGroupItem } from 'reactstrap';
 import LongMenu from './MenuComponent';
+import { getName } from '../Authorisation';
 
 function Treeview(props) {  
 
     const renderTree = (nodes) => (
-        <TreeItem key={nodes.id} nodeId={nodes.id} onLabelClick={(event) => {event.preventDefault()}}
+        <TreeItem key={nodes.id} nodeId={nodes.id} onLabelClick={(event) =>event.preventDefault()}
          label={
-            <div className="list-group-item">
+            <ListGroupItem>
                 <Row>
                     <Col>
-                        <a href={nodes.url} target="_blank">{nodes.name}</a>
+                        <a target="_blank" href={nodes.url} onClick={(event) => event.stopPropagation()}>{nodes.name}</a>
                     </Col>
                     <Col md={{ offset: 4 }}>
                         <LongMenu user={props.user.id} node={nodes} isFolder={nodes.url ? false : true}
@@ -23,8 +24,8 @@ function Treeview(props) {
                             editBookmarks={props.editBookmarks}/>
                     </Col>
                 </Row>
-            </div>}>
-          {Array.isArray(nodes.children) ? nodes.children.map((node) => renderTree(node)) : null}
+            </ListGroupItem>}>
+            {Array.isArray(nodes.children) ? nodes.children.map((node) => renderTree(node)) : null}
         </TreeItem>
     );
     
@@ -39,59 +40,28 @@ function Treeview(props) {
     );
 }
 
-function Organiser(props) {
-    const data = {
-        id: 'root',
-        name: 'Bookmarks',
-        children: [
-            {
-                id: "1",
-                name: "Banks",
-                children: [
-                    {
-                        id: "2",
-                        name: "Google",
-                        url: "http://google.com"
-                    },
-                    {
-                        id: "3",
-                        name: "Google",
-                        url: "http://google.com"
-                    }
-                ]
-            },
-            {
-                id: "5",
-                name: "Entertainment",
-                children: [
-                    {
-                        id: "6",
-                        name: "Netflix",
-                        url: "http://netflix.com"
-                    },
-                    {
-                        id: "7",
-                        name: "Hotstar",
-                        url: "http://hotstar.com"
-                    }
-                ]
-            },
-            {
-                id: "8",
-                name: "Google",
-                url: "http://hotstar.com"
-            }
-        ]
+class Organiser extends Component {
+    constructor(props) {
+        super(props);
     }
-    return (
-    <>
-        <h1>Hi {props.user.name}</h1>
-        <Treeview data={data} user={props.user} deleteBookmarks={props.deleteBookmarks} 
-                            createBookmarks={props.createBookmarks} 
-                            editBookmarks={props.editBookmarks}/>
-    </>
-    );
+    render()
+    {
+        const data = {
+            id: 'root',
+            name: 'Bookmarks',
+            children: []
+        }
+        return (
+            <>
+                <h1>Hi {getName()}</h1>
+                <Treeview data={this.props.bookmarks.bookmarks} 
+                    user={this.props.user} 
+                    deleteBookmarks={this.props.deleteBookmarks} 
+                    createBookmarks={this.props.createBookmarks} 
+                    editBookmarks={this.props.editBookmarks} />
+            </>
+        );
+    }
 }
-
   
-  export default Organiser;
+export default Organiser;

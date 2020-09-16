@@ -37,7 +37,7 @@ function LongMenu(props) {
 
   const handleDelete = () => {
     console.log("To be deleted: " + props.node.id);
-    props.deleteBookmarks(props.user, props.node.id);
+    props.deleteBookmarks(props.node.id);
   }
 
   const handleUpdate = () => {
@@ -68,8 +68,8 @@ function LongMenu(props) {
         <MenuItem key="delete" onClick={handleDelete}>
           Delete
         </MenuItem>
-        <Create open={addModal} label="Add Bookmark" node={props.node} onHide={() => toggleAddModal} createBookmarks={props.createBookmarks} />
-        <Edit open={editModal} label="Edit Bookmark" node={props.node} onHide={() => toggleEditModal} editBookmarks={props.editBookmarks}/>
+        <Create open={addModal} label="Add Bookmark" node={props.node} userId={props.user} onHide={() => toggleAddModal} createBookmarks={props.createBookmarks} />
+        <Edit open={editModal} label="Edit Bookmark" node={props.node} userId={props.user} onHide={() => toggleEditModal} editBookmarks={props.editBookmarks}/>
       </Menu>
     </div>
   );

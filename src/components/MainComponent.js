@@ -15,9 +15,9 @@ const mapDispatchToProps = (dispatch) => ({
     registerUser: (firstName, lastName, email, password) => dispatch(registerUser(firstName, lastName, email, password)),
     loginUser: (email, password) => dispatch(loginUser(email, password)),
     logoutUser: () => {dispatch(logoutUser())},
-    createBookmarks: (userId, parent, child, name, url) => dispatch(createBookmarks(userId, parent, child, name, url)),
-    editBookmarks: (userId, id, name, url ) => dispatch(editBookmarks(userId, id, name, url)),
-    deleteBookmarks: (userId, nodeId) => dispatch(deleteBookmarks(userId, nodeId))
+    createBookmarks: (parent, child, name, url) => dispatch(createBookmarks(parent, child, name, url)),
+    editBookmarks: (nodeId, name, url ) => dispatch(editBookmarks(nodeId, name, url)),
+    deleteBookmarks: (nodeId) => dispatch(deleteBookmarks(nodeId))
 })
 
 class Main extends Component {
@@ -29,11 +29,19 @@ class Main extends Component {
 
     render() {
       
+      const OrganiserPage = () => {
+        return (
+            <Organiser user={this.props.user} bookmarks={this.props.bookmarks} 
+            deleteBookmarks={this.props.deleteBookmarks} 
+            createBookmarks={this.props.createBookmarks} 
+            editBookmarks={this.props.editBookmarks} />
+        )
+      }
       return (
         <>
             <Header registerUser={this.props.registerUser} loginUser={this.props.loginUser} logoutUser={this.props.logoutUser} status={this.props.user.status}/>
             <Switch>
-              <Route path="/organiser" component={() => <Organiser user={this.props.user} bookmarks={this.props.bookmarks} deleteBookmarks={this.props.deleteBookmarks} createBookmarks={this.props.createBookmarks} editBookmarks={this.props.editBookmarks}/>} />
+              <Route path="/organiser" component={OrganiserPage}/>
               <Redirect to="/organiser" />
             </Switch>
         </>

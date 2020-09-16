@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Navbar, Nav, NavItem, Jumbotron, Modal, Button, ModalHeader, ModalBody, Form, FormFeedback, FormGroup, Input, Label, Col} from 'reactstrap';
 import { NavLink } from 'react-router-dom';
+import { isLoggedIn } from '../Authorisation';
 
 class Header extends Component {
 
@@ -106,7 +107,7 @@ class Header extends Component {
 
     handleLogin(event) {
         this.toggleLoginModal();
-        alert("Username: " + this.username.value + " Password: " + this.password.value + " Remember:" + this.remember.checked);
+        console.log("Loggin In: Username: " + this.username.value);
         this.props.loginUser(this.username.value, this.password.value);
         event.preventDefault();
     }
@@ -149,7 +150,7 @@ class Header extends Component {
                             </Button>
                         </NavItem>
                         { 
-                            (this.props.status === "True") ? 
+                            (isLoggedIn()) ? 
                             <NavItem>
                                 <NavLink className="nav-link" to="/organiser" onClick={this.handleLogout}>
                                     <span className="fa fa-home fa-lg"></span> Log Out
@@ -182,13 +183,7 @@ class Header extends Component {
                             <Label htmlFor="password">Password</Label>
                             <Input type="password" id="password" name="password" innerRef={(input) =>this.password = input}/>
                         </FormGroup>
-                        <FormGroup check>
-                            <Label check>
-                                <Input type="checkbox" name="remember" innerRef={(input) =>this.remember = input}/>
-                                Remember Me?
-                            </Label>
-                        </FormGroup>
-                        <Button type="submit" value="submit" class="bg-primary">Login</Button>
+                        <Button type="submit" value="submit" color="bg-primary">Login</Button>
                     </Form>
                 </ModalBody>
             </Modal>

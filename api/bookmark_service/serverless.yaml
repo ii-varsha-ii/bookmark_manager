@@ -23,7 +23,7 @@ functions:
     handler: fetch.fetch
     events:
       - http:
-          path: fetch/{userid}
+          path: fetch
           method: get
           cors: true
   create:
@@ -37,8 +37,15 @@ functions:
     handler: delete.delete
     events:
       - http:
-          path: delete/{userid}/{nodeid}
+          path: delete/{nodeid}
           method: delete
+          cors: true
+  update:
+    handler: update.update
+    events:
+      - http:
+          path: update
+          method: put
           cors: true
 
 resources:
@@ -59,3 +66,6 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
         TableName: ${self:provider.environment.BOOKMARKS_TABLE}
+
+plugins:
+  - serverless-python-requirements

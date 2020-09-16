@@ -4,31 +4,43 @@ import os
 import time
 import uuid
 import boto3
+import jwt
+import jsonify
+import datetime
+
 from boto3.dynamodb.conditions import Key
 
 dynamodb = boto3.resource('dynamodb')
 
+def encodeAuthToken(user_id):
+    payload = {
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=2),
+        'iat': datetime.datetime.utcnow(),
+        'sub': user_id
+    }
+    token = jwt.encode(payload, 'super-secret-key', algorithm='HS256')
+    return token
+
 def login(event, context):
     data = json.loads(event['body'])
     if 'email' not in data or 'password' not in data:
-        raise Exception("Registeration failed!")
+        raise Exception("Login failed!")
     
-    table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
+    table = dynamodb.Table(os.environ['USER_TABLE'])
 
-    response = table.query(
-        IndexName="email-index",
-        KeyConditionExpression = Key('email').eq(data['email'])
-    )
+    response = table.get_item(Key={'email': data['email']})
 
-    if len(response['Items']) == 0:
+    if 'Item' not in response:
         result = data
         result['status'] = "False"
         result['message'] =  "User doesn't exist. Register to continue."
     
     else:
-        result = response['Items'][0]
+        result = response['Item']
         
         if result['password'] == data['password']:
+            token = encodeAuthToken(result['id'])
+            result['auth_token'] = token.decode('utf-8')
             result['status'] = "True"
             result['message'] = "Logged In Successfully."
         else:

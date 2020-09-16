@@ -10,10 +10,10 @@ class Edit extends Component{
     }
 
     handleSubmit(event){
-        this.props.editBookmarks(this.props.node.id, this.name.value, this.url.value);
+        this.props.editBookmarks(this.props.node.id, this.name.value, (this.props.node.url) ? this.url.value : null);
         event.preventDefault();
     }
-    
+
     render() {
         return(
             <div>
