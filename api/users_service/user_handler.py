@@ -4,7 +4,10 @@ import time
 import uuid
 
 from encode_auth import EncodeAuth
-
+"""
+A class used to handle registeration, authentication and 
+log in of users
+"""
 class UserHandler:
     def __init__(self, body):
         self.table = boto3.resource('dynamodb').Table(os.environ['USER_TABLE'])
@@ -14,7 +17,10 @@ class UserHandler:
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             }
-    
+    """
+    Check if the request body consists of 
+    appropriate fields for furthur processing
+    """
     def register_body_checker(self):
         if 'firstname' not in self.data or \
             'lastname' not in self.data or \
@@ -29,6 +35,10 @@ class UserHandler:
             return False
         return True
     
+    """
+    Construct and insert new user object 
+    upon registeration
+    """
     def create_user(self):
         timestamp = str(time.time())
         item = {
@@ -46,6 +56,9 @@ class UserHandler:
             return False
         return True
     
+    """
+    Check authentication and return JWT token
+    """
     def verify_user(self):
         response = self.table.get_item(
                         Key={

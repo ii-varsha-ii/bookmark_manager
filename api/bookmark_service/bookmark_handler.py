@@ -3,7 +3,9 @@ import os
 import uuid
 
 from decode_auth import DecodeAuth
-
+"""
+A class used to handle operations on the bookmarks
+"""
 class BookmarkHandler:
     def __init__(self, body = None):
         self.table = boto3.resource('dynamodb').Table(os.environ['BOOKMARKS_TABLE'])
@@ -14,6 +16,9 @@ class BookmarkHandler:
                 'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
             }
 
+    """ 
+    Check if the Authorization header is present 
+    """
     def get_token(self, event):
         if 'Authorization' not in event['headers']:
             return None
@@ -23,6 +28,9 @@ class BookmarkHandler:
             return token
         return None
     
+    """ 
+    Decode the JWT token
+    """
     def decode_token(self, token):
         decoded = DecodeAuth.decode_auth_token(token)
         if isinstance(decoded, str):
@@ -45,6 +53,44 @@ class BookmarkHandler:
             return False
         return True
 
+    """ 
+    Helper function to insert a new bookmark entry
+    """
+    def recursive_insert(self, bookmarks, parent, item):
+        for i, key in enumerate(bookmarks):
+            if 'children' in key and key['id'] == parent:
+                key['children'].append(item)
+            elif 'children' in key:
+                key['children'] = self.recursive_insert(key['children'], parent, item)
+        return bookmarks
+    
+    """ 
+    Helper function to delete a bookmark entry
+    """
+    def recursive_delete(self, bookmarks, itemId):
+        for i, key in enumerate(bookmarks):
+            if key['id'] == itemId:
+                bookmarks.remove(key)
+            elif 'children' in key:
+                key['children'] = self.recursive_delete(key['children'],itemId)
+        return bookmarks
+
+    """ 
+    Helper function to update a bookmark entry
+    """
+    def recursive_update(self, bookmarks):
+        for i, key in enumerate(bookmarks):
+            if key['id'] == self.data['nodeid']:
+                key['name'] = self.data['name']
+                if self.data['url'] is not None:
+                    key['url'] = self.data['url']
+            elif 'children' in key:
+                key['children'] = self.recursive_update(key['children'])
+        return bookmarks
+
+    """ 
+    Return the bookmarks object if an entry for the user exists or create a new bookmark structure
+    """
     def put_struct(self, userid):
         initial = {
             'userid': userid,
@@ -60,33 +106,9 @@ class BookmarkHandler:
         except:
             return None
     
-    
-    def recursive_insert(self, bookmarks, parent, item):
-        for i, key in enumerate(bookmarks):
-            if 'children' in key and key['id'] == parent:
-                key['children'].append(item)
-            elif 'children' in key:
-                key['children'] = self.recursive_insert(key['children'], parent, item)
-        return bookmarks
-    
-    def recursive_delete(self, bookmarks, itemId):
-        for i, key in enumerate(bookmarks):
-            if key['id'] == itemId:
-                bookmarks.remove(key)
-            elif 'children' in key:
-                key['children'] = self.recursive_delete(key['children'],itemId)
-        return bookmarks
-
-    def recursive_update(self, bookmarks):
-        for i, key in enumerate(bookmarks):
-            if key['id'] == self.data['nodeid']:
-                key['name'] = self.data['name']
-                if self.data['url'] is not None:
-                    key['url'] = self.data['url']
-            elif 'children' in key:
-                key['children'] = self.recursive_update(key['children'])
-        return bookmarks
-
+    """ 
+    Construct new bookmark entry structure
+    """
     def create_entry(self, bookmarks):
         if self.data['child'] is None:
             item = {
@@ -114,15 +136,24 @@ class BookmarkHandler:
         print(bookmarks)
         return bookmarks
     
+    """ 
+    Delete entry
+    """
     def delete_entry(self, bookmarks):
         itemid = self.data['nodeid']
         bookmarks['children'] = self.recursive_delete(bookmarks['children'], itemid)
         return bookmarks
     
+    """ 
+    Update entry
+    """
     def update_entry(self, bookmarks):
         bookmarks['children'] = self.recursive_update(bookmarks['children'])
         return bookmarks
-            
+
+    """ 
+    Get bookmarks of a particular userid
+    """ 
     def get_bookmarks(self, userid):
         try:
             response = self.table.get_item(Key={'userid': userid})
@@ -133,6 +164,9 @@ class BookmarkHandler:
         except:
             return None
 
+    """ 
+    Update bookmarks object 
+    """ 
     def update_bookmarks(self, userid, bookmarks):
         try:
             response = self.table.update_item(
