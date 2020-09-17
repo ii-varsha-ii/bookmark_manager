@@ -111,6 +111,7 @@ export const loginUser = (email, password) => (dispatch) =>
 export const logoutUser = () => (dispatch) => {
     localStorage.clear();
     dispatch(logout());
+    dispatch(clearBookmarks());
 }
 
 export const refreshBookmarks = (details) => ({
@@ -118,14 +119,18 @@ export const refreshBookmarks = (details) => ({
     payload: details
 });
 
+export const clearBookmarks = () => ({
+    type: ActionTypes.CLEAR_BOOKMARKS
+});
+
 export const createBookmarks = (parentId, childId, name, url) => (dispatch) => {
+    
     const newBookmark = {
         parent: parentId,
         child: childId,
         name: name,
         url: url
     }
-    //newBookmark.date = new Date().toISOString();
     console.log(newBookmark);
     return fetch(bookmarkUrl + '/create', {
         method: 'POST',
@@ -154,9 +159,15 @@ export const createBookmarks = (parentId, childId, name, url) => (dispatch) => {
     })
     .then(response => response.json())
     .then(response => {
-        dispatch(refreshBookmarks(response.bookmarks));
-        console.log(response.bookmarks);
-        alert("New entry created " + response);
+        if (!!!response.bookmarks) {
+            alert("Authorisation failed. Bookmarks cant be retrived")
+        }
+        else
+        {
+            dispatch(refreshBookmarks(response.bookmarks));
+            console.log(response.bookmarks);
+            alert("New entry created");
+        }
     })
     .catch(error => console.log(error.message))
 }
@@ -172,7 +183,8 @@ export const fetchBookmarks = () => (dispatch) => {
             'Content-Type' : 'application/json'
         },
         credentials: 'same-origin'
-    }).then(response => {
+    })
+    .then(response => {
             if (response.ok)
             {
                 return response;
@@ -182,19 +194,23 @@ export const fetchBookmarks = () => (dispatch) => {
                 error.response = response;
                 throw error;
             }
-        },
-        error => {
-            var errmess = new Error(error.message);
-            throw error;
+    },
+    error => {
+        throw error;
+    }
+    )
+    .then(response => response.json())
+    .then(response => {
+        if (!!!response.bookmarks) {
+            alert("Authorisation failed. Bookmarks cant be retrived:" + response);
         }
-        )
-        .then(response => response.json())
-        .then(response => {
+        else {
             dispatch(refreshBookmarks(response.bookmarks));
-        })
-        .catch(error => console.log(error.message));
+            console.log("Bookmarks fetched and loaded");
+        }
+    })
+    .catch(error => console.log(error.message));
 }
-
 
 export const editBookmarks = (nodeId, name, url) => (dispatch) => {
     const newBookmark = {
@@ -230,8 +246,14 @@ export const editBookmarks = (nodeId, name, url) => (dispatch) => {
     })
     .then(response => response.json())
     .then(response => {
-        dispatch(refreshBookmarks(response.bookmarks));
-        console.log("Entry updated:  " + response);
+        if(!!!response.bookmarks) {
+            alert("Authorisation failed. Bookmarks cant be retrived");
+        }
+        else{
+            dispatch(refreshBookmarks(response.bookmarks));
+            console.log("Entry edited: " + response);
+            alert("Entry editted");
+        }
     })
     .catch(error => console.log(error.message))
 }
@@ -264,8 +286,14 @@ export const deleteBookmarks = (nodeId) => (dispatch) => {
     })
     .then(response => response.json())
     .then(response => {
-        dispatch(refreshBookmarks(response.bookmarks));
-        console.log("Entry deleted: " + response.bookmarks);
+        if(!!!response.bookmarks) {
+            alert("Authorisation failed. Bookmarks cant be retrived");
+        }
+        else{
+            dispatch(refreshBookmarks(response.bookmarks));
+            console.log("Entry deleted: " + response);
+            alert("Entry deleted");
+        }
     })
     .catch(error => console.log(error.message))
 }

@@ -28,7 +28,7 @@ class Create extends Component {
 
     handleSubmit(event) {
         console.log("Creating bookmark : Name: " + this.name.value + " Url: " + this.url.value );
-        this.props.createBookmarks(this.props.node.id, (this.state.addChildFolder.length == 1) ? this.newFolderName.value : null, this.name.value, this.url.value);
+        this.props.createBookmarks(this.props.node.id, (this.state.addChildFolder.length === 1) ? this.newFolderName.value : null, this.name.value, this.url.value);
         event.preventDefault();
     };
     render() {

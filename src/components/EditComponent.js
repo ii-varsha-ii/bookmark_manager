@@ -26,7 +26,7 @@ class Edit extends Component{
                             <FormGroup row>
                                 <Label htmlFor="name" sm={3}>Name : </Label>
                                 <Col sm={6}>
-                                    <Input type="text" id="name" name="name" innerRef={(input) =>this.name = input}/>
+                                    <Input type="text" id="name" name="name" defaultValue={this.props.node.name} innerRef={(input) =>this.name = input}/>
                                 </Col>
                             </FormGroup>
                             {
@@ -34,7 +34,7 @@ class Edit extends Component{
                                 <FormGroup row>
                                     <Label htmlFor="url" sm={3}>Url : </Label>
                                     <Col sm={6}>
-                                        <Input type="url" id="url" name="url" innerRef={(input) =>this.url = input}/>
+                                        <Input type="url" id="url" name="url" defaultValue={this.props.node.url} innerRef={(input) =>this.url = input}/>
                                     </Col>
                                 </FormGroup> : null
                             }

@@ -5,7 +5,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import TreeItem from '@material-ui/lab/TreeItem';  
 import { Row, Col, ListGroupItem } from 'reactstrap';
 import LongMenu from './MenuComponent';
-import { getName } from '../Authorisation';
+import { getBookmarks, getName, isBookmarksLoaded } from '../Authorisation';
 
 function Treeview(props) {  
 
@@ -30,7 +30,7 @@ function Treeview(props) {
     );
     
     return (
-        <div>
+        <div> 
             <Col sm={6}>
                 <TreeView defaultCollapseIcon={<ExpandMoreIcon />} defaultExpanded={['root']} defaultExpandIcon={<ChevronRightIcon />}>
                     {renderTree(props.data)}
@@ -41,20 +41,12 @@ function Treeview(props) {
 }
 
 class Organiser extends Component {
-    constructor(props) {
-        super(props);
-    }
     render()
     {
-        const data = {
-            id: 'root',
-            name: 'Bookmarks',
-            children: []
-        }
         return (
             <>
                 <h1>Hi {getName()}</h1>
-                <Treeview data={this.props.bookmarks.bookmarks} 
+                <Treeview data={ isBookmarksLoaded() ? getBookmarks() : this.props.bookmarks.bookmarks}
                     user={this.props.user} 
                     deleteBookmarks={this.props.deleteBookmarks} 
                     createBookmarks={this.props.createBookmarks} 
