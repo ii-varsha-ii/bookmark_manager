@@ -127,7 +127,7 @@ class BookmarkHandler:
         try:
             response = self.table.get_item(Key={'userid': userid})
             if 'Item' not in response:
-                return put_struct(userid)
+                return self.put_struct(userid)
             else:
                 return response['Item']['bookmarks']
         except:

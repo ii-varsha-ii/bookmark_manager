@@ -202,6 +202,7 @@ export const fetchBookmarks = () => (dispatch) => {
     .then(response => response.json())
     .then(response => {
         if (!!!response.bookmarks) {
+            console.log(response);
             alert("Authorisation failed. Bookmarks cant be retrived:" + response);
         }
         else {
