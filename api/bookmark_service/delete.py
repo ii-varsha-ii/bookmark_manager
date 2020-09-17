@@ -1,75 +1,30 @@
 import json
-import boto3
-import uuid
-import os
-import jwt
-from boto3.dynamodb.conditions import Key
 
-dynamodb = boto3.resource('dynamodb')
+from bookmark_handler import BookmarkHandler
 
-def decodeAuthToken(token):
-    try:
-        payload = jwt.decode(token, 'super-secret-key', algorithms=['HS256'])
-        return payload
-    except jwt.ExpiredSignatureError:
-        return 'Signature expired. Login please'
-    except jwt.InvalidTokenError:
-        return 'Nice try, invalid token. Login please'
-
-def recursive_delete(bookmarks, itemId):
-    for i, key in enumerate(bookmarks):
-        if key['id'] == itemId:
-            bookmarks.remove(key)
-        elif 'children' in key:
-            key['children'] = recursive_delete(key['children'],itemId)
-    return bookmarks
-    
 def delete(event, context):
-    auth_header = event['headers']['Authorization']
-    data = event['pathParameters']
-    if auth_header:
-        token = auth_header.split(" ")[1]
-    else:
-        token = ''
 
+    body = event['pathParameters']
+    bookmark_handler = BookmarkHandler(body)
+    token = bookmark_handler.get_token(event)
     result = {}
     if token:
-        decoded = decodeAuthToken(token)
-        if isinstance(decoded, str):
+        decoded, status = bookmark_handler.decode_token(token)
+        if not status:
             result['message'] = decoded
         else:
-            userid = decoded['sub']
-            table = dynamodb.Table(os.environ['BOOKMARKS_TABLE'])
-            response = table.get_item(Key={'userid': userid})
-
-            itemId = data['nodeid']
+            userid = decoded
+            old_bookmarks = bookmark_handler.get_bookmarks(userid)
+            new_bookmarks = bookmark_handler.delete_entry(old_bookmarks)
             
-            bookmarks = response['Item']['bookmarks']
-            bookmarks['children'] = recursive_delete(bookmarks['children'], itemId)
-            
-            response = table.update_item(
-                Key={
-                    'userid': userid
-                },
-                UpdateExpression="set bookmarks = :b",
-                ExpressionAttributeValues={
-                    ':b': bookmarks
-                },
-                ReturnValues="UPDATED_NEW"
-            )
-            result['bookmarks'] = response['Attributes']['bookmarks']
+            result['bookmarks'] = bookmark_handler.update_bookmarks(userid, new_bookmarks)
             result['message'] = 'Success'
     else:
         result['message'] = 'Authorization string empty'
 
-
-    response = {
+    return {
         'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-        },
+        'headers': bookmark_handler.headers,
         'body': json.dumps(result)
     }
-    return response
+

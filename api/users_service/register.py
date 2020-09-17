@@ -1,40 +1,28 @@
 import json
-import logging
-import os
-import time
-import uuid
 
-import boto3
-dynamodb = boto3.resource('dynamodb')
+from user_handler import UserHandler
 
 def register(event, context):
-    data = json.loads(event['body'])
-    if 'firstname' not in data or 'lastname' not in data or 'email' not in data or 'password' not in data:
-        raise Exception("Registeration failed!")
+    body = json.loads(event['body'])
+    user_handler = UserHandler(body)
+
+    response = {}
+    if user_handler.register_body_checker():
+        if user_handler.create_user():
+            response['status'] = True
+            response['message'] = "Success"
+
+            return {
+                'statusCode': 200,
+                'headers': user_handler.headers,
+                'body': json.dumps(response)
+            }
+
+    response['status'] = False
+    response['message'] = "Failed"
     
-    timestamp = str(time.time())
-
-    table = dynamodb.Table(os.environ['USER_TABLE'])
-
-    item = {
-        'id': str(uuid.uuid1()),
-        'firstname': data['firstname'],
-        'lastname': data['lastname'],
-        'email': data['email'],
-        'password': data['password'],
-        'createdAt': timestamp,
-        'updatedAt': timestamp,
-    }
-
-    table.put_item(Item=item)
-
-    response = {
+    return {
         'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-        },
-        'body': json.dumps(item)
+        'headers': user_handler.headers,
+        'body': json.dumps(response)
     }
-    return response

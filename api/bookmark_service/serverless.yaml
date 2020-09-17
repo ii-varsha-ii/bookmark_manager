@@ -7,6 +7,7 @@ provider:
   runtime: python3.8
   environment:
     BOOKMARKS_TABLE: ${self:service}
+    SECRET_KEY: 'DE78B79CE52A0D55CDE52E825226A0A246DA71B4174EB6026964C0F33A1F7ADF'
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -21,6 +22,7 @@ provider:
 functions:
   fetch:
     handler: fetch.fetch
+    package: {}
     events:
       - http:
           path: fetch
@@ -28,6 +30,7 @@ functions:
           cors: true
   create:
     handler: create.create
+    package: {}
     events:
       - http:
           path: create
@@ -35,6 +38,7 @@ functions:
           cors: true
   delete:
     handler: delete.delete
+    package: {}
     events:
       - http:
           path: delete/{nodeid}
@@ -42,6 +46,7 @@ functions:
           cors: true
   update:
     handler: update.update
+    package: {}
     events:
       - http:
           path: update

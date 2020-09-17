@@ -1,94 +1,34 @@
 import json
-import os
-import uuid
-import boto3
-import jwt
-from boto3.dynamodb.conditions import Key
-    
-dynamodb = boto3.resource('dynamodb')
 
-def decodeAuthToken(token):
-    try:
-        payload = jwt.decode(token, 'super-secret-key', algorithms=['HS256'])
-        return payload
-    except jwt.ExpiredSignatureError:
-        return 'Signature expired. Login please'
-    except jwt.InvalidTokenError:
-        return 'Nice try, invalid token. Login please'
-
-def recursive_insert(bookmarks, parent, item):
-    for i, key in enumerate(bookmarks):
-        if 'children' in key and key['id'] == parent:
-            key['children'].append(item)
-        elif 'children' in key:
-            key['children'] = recursive_insert(key['children'], parent, item)
-        else:
-            print(key)
-    return bookmarks
+from bookmark_handler import BookmarkHandler
 
 def create(event, context):
-    auth_header = event['headers']['Authorization']
-    data = json.loads(event['body'])
-    if auth_header:
-        token = auth_header.split(" ")[1]
-    else:
-        token = ''
+
+    body = json.loads(event['body'])
+    bookmark_handler = BookmarkHandler(body)
 
     result = {}
-    if token:
-        decoded = decodeAuthToken(token)
-        if isinstance(decoded, str):
-            result['message'] = decoded
+    if bookmark_handler.create_body_checker():
+        token = bookmark_handler.get_token(event)
+        if token:
+            decoded, status = bookmark_handler.decode_token(token)
+            if not status:
+                result['message'] = decoded
+            else:
+                userid = decoded
+                old_bookmarks = bookmark_handler.get_bookmarks(userid)
+        
+                new_bookmarks = bookmark_handler.create_entry(old_bookmarks)
+                
+                result['bookmarks'] = bookmark_handler.update_bookmarks(userid, new_bookmarks)
+                result['message'] = 'Success'
         else:
-            userid = decoded['sub']
-            table = dynamodb.Table(os.environ['BOOKMARKS_TABLE'])
-            response = table.get_item(Key={'userid': userid})
-            if data['child'] is None:
-                item = {
-                    'id':  str(uuid.uuid1()),
-                    'name': data['name'],
-                    'url': data['url']
-                }
-            else:
-                item = {
-                    'id': str(uuid.uuid1()),
-                    'name': data['child'],
-                    'children': [
-                        {
-                            'id':  str(uuid.uuid1()),
-                            'name': data['name'],
-                            'url': data['url']
-                        }
-                    ]
-                }
-            bookmarks = response['Item']['bookmarks']
-            if data['parent'] == 'root':
-                bookmarks['children'].append(item)
-            else:
-                bookmarks['children'] = recursive_insert(bookmarks['children'], data['parent'], item)
-
-            response = table.update_item(
-                Key={
-                    'userid': userid
-                },
-                UpdateExpression="set bookmarks = :b",
-                ExpressionAttributeValues={
-                    ':b': bookmarks
-                },
-                ReturnValues="UPDATED_NEW"
-            )
-            result['bookmarks'] = response['Attributes']['bookmarks']
-            result['message'] = 'Success'
+            result['message'] = 'Authorization string empty'
     else:
-        result['message'] = 'Authorization string empty'
+        result['message'] = 'Server error'
 
-    response = {
+    return {
         'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
-        },
+        'headers': bookmark_handler.headers,
         'body': json.dumps(result)
     }
-    return response

@@ -7,6 +7,7 @@ provider:
   runtime: python3.8
   environment:
     USER_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    SECRET_KEY: 'DE78B79CE52A0D55CDE52E825226A0A246DA71B4174EB6026964C0F33A1F7ADF'
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -21,6 +22,7 @@ provider:
 functions:
   register:
     handler: register.register
+    package: {}
     events:
       - http:
           path: register
@@ -29,6 +31,7 @@ functions:
 
   login:
     handler: login.login
+    package: {}
     events:
       - http:
           path: login
