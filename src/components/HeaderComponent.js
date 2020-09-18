@@ -107,13 +107,15 @@ class Header extends Component {
 
     handleLogin(event) {
         this.toggleLoginModal();
+        
         console.log("Loggin In: Username: " + this.username.value);
         this.props.loginUser(this.username.value, this.password.value);
+    
         event.preventDefault();
     }
 
     handleRegister(event) {
-        if(this.state.confirmpassword === this.state.password)
+        if(this.state.confirmpassword === this.state.password && this.state.email && this.state.firstname)
         {
             this.toggleRegisterModal();
             console.log('Current State is: ' + JSON.stringify(this.state));

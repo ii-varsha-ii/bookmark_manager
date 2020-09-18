@@ -15,7 +15,7 @@ def login(event, context):
             'body': json.dumps(result)
         }
     
-    result['status'] = "False"
+    result['status'] = False
     result['message'] = "Credentials check failed"
 
     return {

@@ -64,11 +64,11 @@ class UserHandler:
                         Key={
                             'email': self.data['email']
                         })
-        result = None
+        result = {}
         if 'Item' not in response:
             result = self.data
             
-            result['status'] = "False"
+            result['status'] = False
             result['message'] =  "User doesn't exist. Register to continue."
         
         else:
@@ -77,10 +77,10 @@ class UserHandler:
                 token = EncodeAuth.encode_auth_token(result['id'])
                 result['auth_token'] = token.decode('utf-8')
 
-                result['status'] = "True"
+                result['status'] = True
                 result['message'] = "Logged In Successfully."
             else:
-                result['status'] = "False"
+                result['status'] = False
                 result['message'] = "Username and Password doesn't match"
         return result
 

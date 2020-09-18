@@ -47,8 +47,11 @@ export const registerUser = (firstname, lastname, email, password) => (dispatch)
      })
      .then(response => response.json())
      .then(response => {
-        console.log('New User ', response);
-        alert('Successfully registered! Please Login.');
+         if (response.status)
+         {
+            console.log('New User ', response);
+            alert('Successfully registered! Please Login.');
+         }
      })
      .catch(error => {
          console.log('Registeration failed: ', error.message);
@@ -62,7 +65,7 @@ export const loginUser = (email, password) => (dispatch) =>
         email: email,
         password: password
     }
-    
+    console.log(user);
     return fetch(usersUrl + '/login', {
         method: 'POST',
         mode: "cors",
@@ -91,7 +94,7 @@ export const loginUser = (email, password) => (dispatch) =>
     .then(response => {
     
     console.log('Logged In: ', response);
-    if (response.status === "False")
+    if (response.status === false)
         alert(response.message)
     else
     {
