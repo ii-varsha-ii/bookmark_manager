@@ -1,0 +1,61 @@
+service: user-register-table
+
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: python3.8
+  environment:
+    USER_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    SECRET_KEY: 'DE78B79CE52A0D55CDE52E825226A0A246DA71B4174EB6026964C0F33A1F7ADF'
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USER_TABLE}"
+
+functions:
+  register:
+    handler: register.register
+    package: {}
+    events:
+      - http:
+          path: register
+          method: post
+          cors: true
+
+  login:
+    handler: login.login
+    package: {}
+    events:
+      - http:
+          path: login
+          method: post
+          cors: true
+
+resources:
+  Resources:
+    TodosDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          -
+            AttributeName: email
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.USER_TABLE}
+
+plugins:
+  - serverless-python-requirements
