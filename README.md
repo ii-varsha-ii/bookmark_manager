@@ -1,3 +1,21 @@
+## Bookmark Manager
+An application that helps users to bookmark important pages in a tree folder structure. It allows users to add, edit, delete created bookmarks/folders.
+
+### Front-End :
+
+Reactjs with Redux and Bootstrap
+
+### Back-End :
+
+Language: Python
+Other technologies include,
+1. AWS-Lambda
+2. AWS-DynamoDb 
+3. Serverless framework
+4. JWT tokens - for authorization
+
+## -------------------------------------------------------------------------------------------------------------------------------
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
