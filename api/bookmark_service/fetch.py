@@ -28,4 +28,3 @@ def fetch(event, context):
         'body': json.dumps(result)
     }
     
-    

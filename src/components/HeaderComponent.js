@@ -115,7 +115,7 @@ class Header extends Component {
     }
 
     handleRegister(event) {
-        if(this.state.confirmpassword === this.state.password && this.state.email && this.state.firstname)
+        if(this.state.confirmpassword === this.state.password && this.state.email && this.state.firstname && this.state.password && this.state.lastname)
         {
             this.toggleRegisterModal();
             console.log('Current State is: ' + JSON.stringify(this.state));

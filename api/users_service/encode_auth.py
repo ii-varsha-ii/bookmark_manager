@@ -2,6 +2,7 @@ import datetime
 import jwt
 import os
 
+
 class EncodeAuth:
     @staticmethod
     def encode_auth_token(user_id):

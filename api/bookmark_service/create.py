@@ -2,8 +2,8 @@ import json
 
 from bookmark_handler import BookmarkHandler
 
-def create(event, context):
 
+def create(event, context):
     body = json.loads(event['body'])
     bookmark_handler = BookmarkHandler(body)
 
@@ -17,9 +17,9 @@ def create(event, context):
             else:
                 userid = decoded
                 old_bookmarks = bookmark_handler.get_bookmarks(userid)
-        
+
                 new_bookmarks = bookmark_handler.create_entry(old_bookmarks)
-                
+
                 result['bookmarks'] = bookmark_handler.update_bookmarks(userid, new_bookmarks)
                 result['message'] = 'Success'
         else:
